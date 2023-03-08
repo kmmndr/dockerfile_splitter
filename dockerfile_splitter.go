@@ -102,7 +102,7 @@ func (d *Dockerfile) readContent() {
 			d.addLayer(layer_name)
 
 			if d.isLayer(layer_source) {
-				line = fmt.Sprintf("FROM %s-%s", d.baseImage, layer_source)
+				line = fmt.Sprintf("ARG SOURCE_IMAGE_TAG=latest\nARG SOURCE_IMAGE=%s-%s:$SOURCE_IMAGE_TAG\nFROM $SOURCE_IMAGE", d.baseImage, layer_source)
 			} else {
 				line = fmt.Sprintf("FROM %s", layer_source)
 			}
