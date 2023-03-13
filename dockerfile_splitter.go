@@ -51,7 +51,7 @@ func (dd *Dockerfile) appendLine(line string) {
 
 func (d *Dockerfile) addLayer(name string) {
 	filename := fmt.Sprintf("%s-%s", d.filename, name)
-	baseImage := fmt.Sprintf("%s-%s", d.baseImage, name)
+	baseImage := fmt.Sprintf("%s:latest-%s", d.baseImage, name)
 	dockerLayer := DockerLayer{
 		name:       name,
 		dockerfile: Dockerfile{filename: filename, baseImage: baseImage},
@@ -75,6 +75,10 @@ func (d *Dockerfile) currentLayer() *DockerLayer {
 	}
 
 	return &d.layers[len(d.layers)-1]
+}
+
+func (d *Dockerfile) sourceArgs() string {
+	return fmt.Sprintf("ARG SOURCE_IMAGE_TAG=latest\nARG SOURCE_IMAGE=%s\n", d.baseImage)
 }
 
 func (d *Dockerfile) readContent() {
@@ -102,7 +106,7 @@ func (d *Dockerfile) readContent() {
 			d.addLayer(layer_name)
 
 			if d.isLayer(layer_source) {
-				line = fmt.Sprintf("ARG SOURCE_IMAGE_TAG=latest\nARG SOURCE_IMAGE=%s-%s:$SOURCE_IMAGE_TAG\nFROM $SOURCE_IMAGE", d.baseImage, layer_source)
+				line = fmt.Sprintf("%sFROM $SOURCE_IMAGE:${SOURCE_IMAGE_TAG}-%s", d.sourceArgs(), layer_source)
 			} else {
 				line = fmt.Sprintf("FROM %s", layer_source)
 			}
@@ -113,7 +117,7 @@ func (d *Dockerfile) readContent() {
 		if len(matches) > 0 {
 			layer_source := matches[1]
 
-			prepended_line := fmt.Sprintf("FROM %s-%s as %s", d.baseImage, layer_source, layer_source)
+			prepended_line := fmt.Sprintf("%sFROM $SOURCE_IMAGE:${SOURCE_IMAGE_TAG}-%s as %s\n", d.sourceArgs(), layer_source, layer_source)
 
 			d.prependLine(prepended_line)
 		}
