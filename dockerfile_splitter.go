@@ -94,7 +94,7 @@ func (d *Dockerfile) readContent() {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		re := regexp.MustCompile(`^[[:space:]]*FROM ([^ ]*)( as (.*))*`)
+		re := regexp.MustCompile(`^[[:space:]]*FROM ([^ ]*)( AS (.*))*`)
 		matches := re.FindStringSubmatch(line)
 		if len(matches) > 0 {
 			layer_source := matches[1]
@@ -117,7 +117,7 @@ func (d *Dockerfile) readContent() {
 		if len(matches) > 0 {
 			layer_source := matches[1]
 
-			prepended_line := fmt.Sprintf("%sFROM $SOURCE_IMAGE:${SOURCE_IMAGE_TAG}-%s as %s\n", d.sourceArgs(), layer_source, layer_source)
+			prepended_line := fmt.Sprintf("%sFROM $SOURCE_IMAGE:${SOURCE_IMAGE_TAG}-%s AS %s\n", d.sourceArgs(), layer_source, layer_source)
 
 			d.prependLine(prepended_line)
 		}
